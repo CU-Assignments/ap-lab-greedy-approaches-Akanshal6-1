@@ -1,0 +1,156 @@
+1710. Maximum Units on a Truck
+Solved
+Easy
+Topics
+Companies
+Hint
+You are assigned to put some amount of boxes onto one truck. You are given a 2D array boxTypes, where boxTypes[i] = [numberOfBoxesi, numberOfUnitsPerBoxi]:
+
+numberOfBoxesi is the number of boxes of type i.
+numberOfUnitsPerBoxi is the number of units in each box of the type i.
+You are also given an integer truckSize, which is the maximum number of boxes that can be put on the truck. You can choose any boxes to put on the truck as long as the number of boxes does not exceed truckSize.
+
+Return the maximum total number of units that can be put on the truck.
+
+class Solution {
+public:
+    int maximumUnits(vector<vector<int>>& boxTypes, int truckSize) {
+        priority_queue<pair<int,int>>pq;
+        for(int i=0;i<boxTypes.size();i++){
+            pq.push(make_pair(boxTypes[i][1],boxTypes[i][0]));
+        }
+        int ans = 0;
+        while(!pq.empty() && truckSize>= pq.top().second){
+            truckSize -= pq.top().second;
+            ans += pq.top().second*pq.top().first;
+            pq.pop();
+        }
+        if(!pq.empty() && truckSize){
+            ans += pq.top().first*truckSize;
+        }
+        return ans;
+    }
+};
+
+_______________________________________________________________________________________________________________________________________________________________
+
+
+1962. Remove Stones to Minimize the Total
+Solved
+Medium
+Topics
+Companies
+Hint
+You are given a 0-indexed integer array piles, where piles[i] represents the number of stones in the ith pile, and an integer k. You should apply the following operation exactly k times:
+
+Choose any piles[i] and remove floor(piles[i] / 2) stones from it.
+Notice that you can apply the operation on the same pile more than once.
+
+Return the minimum possible total number of stones remaining after applying the k operations.
+
+floor(x) is the greatest integer that is smaller than or equal to x (i.e., rounds x down).
+
+class Solution {
+public:
+bool static help(int x,int y)
+{
+    return x>y;
+}
+    int minStoneSum(vector<int>& piles, int k) {
+        
+        int n=piles.size();
+        priority_queue<int,vector<int>>pq(piles.begin(),piles.end());
+        int ans=accumulate(piles.begin(),piles.end(),0);
+        int i=0;
+        while(k>0 && !pq.empty())
+        {
+            int temp=pq.top();
+            pq.pop();
+            ans-=(temp/2);
+            pq.push(temp-temp/2);
+            k--;
+        }
+        
+        return ans;
+    }
+};
+
+_______________________________________________________________________________________________________________________________________________________________________
+
+2071. Maximum Number of Tasks You Can Assign
+Solved
+Hard
+Topics
+Companies
+Hint
+You have n tasks and m workers. Each task has a strength requirement stored in a 0-indexed integer array tasks, with the ith task requiring tasks[i] strength to complete. The strength of each worker is stored in a 0-indexed integer array workers, with the jth worker having workers[j] strength. Each worker can only be assigned to a single task and must have a strength greater than or equal to the task's strength requirement (i.e., workers[j] >= tasks[i]).
+
+Additionally, you have pills magical pills that will increase a worker's strength by strength. You can decide which workers receive the magical pills, however, you may only give each worker at most one magical pill.
+
+Given the 0-indexed integer arrays tasks and workers and the integers pills and strength, return the maximum number of tasks that can be completed.
+
+class Solution {
+public:
+    int maxTaskAssign(vector<int>& tasks, vector<int>& workers, int p, int strength) {
+        int n = tasks.size(), m = workers.size();
+        
+        // Sorting the tasks and workers in increasing order
+        sort(tasks.begin(), tasks.end());
+        sort(workers.begin(), workers.end());
+        int lo = 0, hi = min(m, n);
+        int ans;
+        
+        while(lo <= hi) {
+            int mid = lo + (hi - lo) / 2;
+            int count = 0;
+            bool flag = true;
+            
+            // Inserting all workers in a multiset
+            multiset<int> st(workers.begin(), workers.end());
+            
+            // Checking if the mid smallest tasks can be assigned
+            for(int i = mid - 1; i >= 0; i--) {
+                
+                // Case 1: Trying to assing to a worker without the pill
+                auto it = prev(st.end());
+                if(tasks[i] <= *it) {
+                    
+                    // Case 1 satisfied!
+                    st.erase(it);
+                } else {
+                    
+                    // Case 2: Trying to assign to a worker with the pill
+                    auto it = st.lower_bound(tasks[i] - strength);
+                    if(it != st.end()) {
+                        
+                        // Case 2 satisfied!
+                        count++;
+                        st.erase(it);
+                    } else {
+                        
+                        // Case 3: Impossible to assign mid tasks
+                        flag = false;
+                        break;
+                    }
+                }
+                
+                // If at any moment, the number of pills require for mid tasks exceeds 
+                // the allotted number of pills, we stop the loop
+                if(count > p) {
+                    flag = false;
+                    break;
+                }
+            }
+            
+            if(flag) {
+                ans = mid;
+                lo = mid + 1;
+            } else {
+                hi = mid - 1;
+            }
+        }
+        return ans;
+    }
+};
+
+_____________________________________________________________________________________________________________________________________________________________________
